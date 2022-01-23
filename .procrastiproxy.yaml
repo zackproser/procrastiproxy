@@ -1,0 +1,4 @@
+port: "8001"
+blocked_hosts:
+  - reddit.com
+  - nytimes.com
