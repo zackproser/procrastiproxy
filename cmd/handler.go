@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -36,16 +39,49 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type AdminCommand struct {
+	Command string
+	Host    string
+}
+
+func parseCommandFromPath(path string) (*AdminCommand, error) {
+	aCmd := &AdminCommand{}
+	pathElem := strings.Split(path, "/")
+	log.Printf("pathElem: %+v pathElem[2]: %+v\n", pathElem, pathElem[2])
+	if len(pathElem) < 4 {
+		return aCmd, errors.New(fmt.Sprintf("Received malformed request path: %s\n", path))
+	}
+	if pathElem[2] == "block" || pathElem[2] == "unblock" {
+		log.Printf("Received valid command: %s\n", pathElem[2])
+		aCmd.Command = pathElem[2]
+	}
+	url, parseErr := url.Parse(pathElem[3])
+	log.Printf("Parsed URL: %s\n", url.String())
+	if parseErr != nil {
+		return aCmd, parseErr
+	}
+	aCmd.Host = url.String()
+	return aCmd, nil
+}
+
 func adminHandler(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(logrus.Fields{
 		"Path": r.URL.Path,
 	}).Debug("Admin handler received request")
-	pathElem := strings.Split(r.URL.Path, "/")
-	log.Printf("pathElem: %+v pathElem[3]: %+v\n", pathElem, pathElem[2])
-	if len(pathElem) < 1 {
-		log.Printf("Received malformed request path: %s\n", r.URL.Path)
+	adminCmd, err := parseCommandFromPath(r.URL.Path)
+	if err != nil {
+		log.Println(err)
 	}
-	if pathElem[2] == "block" || pathElem[2] == "unblock" {
-		log.Printf("Received valid command: %s\n", pathElem[2])
+	var respMsg string
+	list := GetList()
+	if adminCmd.Command == "block" {
+		list.Add(adminCmd.Host)
+		respMsg = fmt.Sprintf("Successfully added: %s to the block list\n", adminCmd.Host)
 	}
+	if adminCmd.Command == "unblock" {
+		list.Remove(adminCmd.Host)
+		respMsg = fmt.Sprintf("Successfully removed: %s from the block list\n", adminCmd.Host)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(respMsg))
 }
