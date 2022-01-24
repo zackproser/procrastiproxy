@@ -45,6 +45,7 @@ func TestBlockHosts(t *testing.T) {
 
 		// Set the blocked hosts config variable that is used by the proxy backend
 		viper.Set("blocked_hosts", tc.BlockedHosts)
+		LoadBlockList()
 
 		res, err := client.Get(tc.URL)
 		if err != nil {

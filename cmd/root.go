@@ -89,4 +89,7 @@ func initConfig() {
 		level = log.DebugLevel
 	}
 	log.SetLevel(level)
+
+	// Build the in-memory block list
+	LoadBlockList()
 }

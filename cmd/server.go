@@ -13,7 +13,8 @@ import (
 
 func hostIsBlocked(host string) bool {
 	host = strings.ToLower(strings.TrimSpace(host))
-	return includes(viper.GetStringSlice("blocked_hosts"), host)
+	blockList := GetList()
+	return blockList.Contains(host)
 }
 
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
