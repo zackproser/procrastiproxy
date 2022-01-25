@@ -92,4 +92,7 @@ func initConfig() {
 
 	// Build the in-memory block list
 	LoadBlockList()
+
+	// Configure proxy time-based block settings
+	ConfigureProxyTimeSettings()
 }

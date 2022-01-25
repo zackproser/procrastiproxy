@@ -23,7 +23,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		"blocked sites": viper.Get("blocked_hosts"),
 	}).Debug("Blocked site hosts")
 
-	if hostIsBlocked(r.URL.Host) {
+	if hostIsBlocked(r.URL.Host) && WithinBlockWindow() {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("Forbidden"))
 	} else {
