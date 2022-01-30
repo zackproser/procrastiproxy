@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
@@ -23,7 +24,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		"blocked sites": viper.Get("blocked_hosts"),
 	}).Debug("Blocked site hosts")
 
-	if hostIsBlocked(r.URL.Host) && WithinBlockWindow() {
+	if hostIsBlocked(r.URL.Host) && WithinBlockWindow(time.Now(), GetProxyTimeSettings()) {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("Forbidden"))
 	} else {
