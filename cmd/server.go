@@ -9,8 +9,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func sanitizeHost(host string) string {
+	return strings.ToLower(strings.TrimSpace(strings.Replace(host, "\n", "", -1)))
+}
+
 func hostIsBlocked(host string) bool {
-	host = strings.ToLower(strings.TrimSpace(host))
+	host = sanitizeHost(host)
 	blockList := GetList()
 	return blockList.Contains(host)
 }
@@ -20,7 +24,7 @@ func RunServer(cmd *cobra.Command, args []string) {
 		"Port": args[0],
 	}).Info("Proxy listening...")
 
-	http.HandleFunc("/", proxyHandler)
+	http.HandleFunc("/", timeAwareHandler)
 	http.HandleFunc("/admin/", adminHandler)
 
 	log.Fatal(http.ListenAndServe(":"+args[0], nil))

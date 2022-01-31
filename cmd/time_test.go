@@ -29,6 +29,30 @@ func TestWithinBlockWindow(t *testing.T) {
 			CheckTime:      parseTime("10:00AM"),
 			Want:           true,
 		},
+		{
+			StartBlockTime: "1:00PM",
+			EndBlockTime:   "5:00PM",
+			CheckTime:      parseTime("2:00PM"),
+			Want:           true,
+		},
+		{
+			StartBlockTime: "8:00AM",
+			EndBlockTime:   "5:00PM",
+			CheckTime:      parseTime("8:01AM"),
+			Want:           true,
+		},
+		{
+			StartBlockTime: "8:00AM",
+			EndBlockTime:   "5:00PM",
+			CheckTime:      parseTime("6:00PM"),
+			Want:           false,
+		},
+		{
+			StartBlockTime: "8:00AM",
+			EndBlockTime:   "5:00PM",
+			CheckTime:      parseTime("7:00AM"),
+			Want:           false,
+		},
 	}
 	for _, tc := range testCases {
 		pts := ProxyTimeSettings{

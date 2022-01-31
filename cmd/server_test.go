@@ -14,7 +14,7 @@ func TestBlockHosts(t *testing.T) {
 
 	// Create a test backend that wraps our proxyHandler. This test backend
 	// can then be sent various HTTP requests in test cases
-	backend := httptest.NewServer(http.HandlerFunc(proxyHandler))
+	backend := httptest.NewServer(http.HandlerFunc(blockListAwareHandler))
 	defer backend.Close()
 
 	proxyUrl, err := url.Parse(backend.URL)

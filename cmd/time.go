@@ -67,7 +67,6 @@ func stringToTime(str string) time.Time {
 	if err != nil {
 		log.Info("Failed to decode time:", err)
 	}
-	log.Info("Time decoded:", tm)
 	return tm
 }
 
@@ -81,7 +80,7 @@ func WithinBlockWindow(check time.Time, pts ProxyTimeSettings) bool {
 	start := stringToTime(startTimeString)
 	end := stringToTime(endTimeString)
 
-	if timeNow.Before(start) {
+	if timeNow.Before(start) || timeNow.After(end) {
 		return false
 	}
 

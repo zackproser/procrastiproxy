@@ -14,6 +14,22 @@ import (
 	"github.com/spf13/viper"
 )
 
+func makeProxyRequest(w http.ResponseWriter, r *http.Request) {
+	// Perform the supplied request and return the response to caller
+	res, err := http.Get(r.URL.String())
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	// Return the request to caller by performing a very rudimentary clone of it, here
+	w.Write(body)
+}
+
+func blockRequest(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusForbidden)
+	w.Write([]byte("Forbidden"))
+}
+
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(logrus.Fields{
 		"Host": r.URL.Host,
@@ -24,20 +40,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		"blocked sites": viper.Get("blocked_hosts"),
 	}).Debug("Blocked site hosts")
 
-	if hostIsBlocked(r.URL.Host) && WithinBlockWindow(time.Now(), GetProxyTimeSettings()) {
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("Forbidden"))
-	} else {
-		// Perform the supplied request and return the response to caller
-		res, err := http.Get(r.URL.String())
-		if err != nil {
-			log.Fatal(err)
-		}
-		body, err := ioutil.ReadAll(res.Body)
-		// Return the request to caller by performing a very rudimentary clone of it, here
-		w.WriteHeader(res.StatusCode)
-		w.Write(body)
-	}
+	makeProxyRequest(w, r)
 }
 
 type AdminCommand struct {
@@ -63,6 +66,23 @@ func parseCommandFromPath(path string) (*AdminCommand, error) {
 	}
 	aCmd.Host = url.String()
 	return aCmd, nil
+}
+
+func timeAwareHandler(w http.ResponseWriter, r *http.Request) {
+	if WithinBlockWindow(time.Now(), GetProxyTimeSettings()) {
+		log.Info("Request made within block time window. Examining if host permitted..")
+		blockListAwareHandler(w, r)
+	}
+	log.Info("Request made outside of configured block time window. Passing through...")
+	proxyHandler(w, r)
+}
+
+func blockListAwareHandler(w http.ResponseWriter, r *http.Request) {
+	host := sanitizeHost(r.URL.Host)
+	if hostIsBlocked(host) {
+		blockRequest(w)
+	}
+	makeProxyRequest(w, r)
 }
 
 func adminHandler(w http.ResponseWriter, r *http.Request) {
