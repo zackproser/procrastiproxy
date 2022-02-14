@@ -1,4 +1,4 @@
-module github.com/zackproser/procrastiproxy
+module procrastiproxy
 
 go 1.17
 
