@@ -69,6 +69,7 @@ func timeAwareHandler(w http.ResponseWriter, r *http.Request) {
 	if WithinBlockWindow(time.Now().Local(), GetProxyTimeSettings()) {
 		log.Info("Request made within block time window. Examining if host permitted..")
 		blockListAwareHandler(w, r)
+		return
 	}
 	log.Info("Request made outside of configured block time window. Passing through...")
 	proxyHandler(w, r)
@@ -78,6 +79,7 @@ func blockListAwareHandler(w http.ResponseWriter, r *http.Request) {
 	host := sanitizeHost(r.URL.Host)
 	if hostIsBlocked(host) {
 		blockRequest(w)
+		return
 	}
 	makeProxyRequest(w, r)
 }

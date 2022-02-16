@@ -1,7 +1,0 @@
-port: "8001"
-blocked_hosts:
-  - reddit.com
-  - nytimes.com
-timezone: America/New_York
-block_start_time: 9:00AM
-block_end_time: 5:00PM
