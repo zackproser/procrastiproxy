@@ -8,7 +8,7 @@ It implements an in-memory, mutable list for tracking hosts that should be block
 
 ## Use procrastiproxy as a library
 
-You can either import procrastiproxy into your own project:
+You can import procrastiproxy into your own project:
 
 ```golang
 import github.com/zackproser/procrastiproxy
@@ -16,13 +16,15 @@ import github.com/zackproser/procrastiproxy
 
 ## Install procrastiproxy as a command using go
 
-or, install and use it as a command line interface (CLI) tool:
+Alternatively, you can install and use it as a command line interface (CLI) tool:
 
 ```bash
 go install github.com/zackproser/procrastiproxy
 ```
 
 ## Install procrastiproxy as a command using the install script
+
+You can also run the install script to handle setup for you.
 
 ```bash
 ./install.sh
@@ -31,7 +33,7 @@ go install github.com/zackproser/procrastiproxy
 # Running locally
 
 ```bash
-go build
+go build -o procrastiproxy ./cmd
 
 ./procrastiproxy --port 8001 --block reddit.com
 ```
