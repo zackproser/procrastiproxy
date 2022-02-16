@@ -99,7 +99,7 @@ You can set your working hours by passing the `--block-start-time` and `--block-
 procrastiproxy --block reddit.com,nytimes.com --block-start-time 9:15AM --block-end-time 5:00PM
 ```
 
-If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed.
+If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed. If you do not specify a start and end time to working hours, procrastiproxy will default to blocking mode between 9:00AM and 5:00PM in your local time.
 
 # Running tests
 
