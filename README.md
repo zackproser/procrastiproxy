@@ -6,7 +6,7 @@ It implements an in-memory, mutable list for tracking hosts that should be block
 
 # Getting started
 
-## Use procrastiproxy as a library
+**Use procrastiproxy as a library**
 
 You can import procrastiproxy into your own project:
 
@@ -14,7 +14,7 @@ You can import procrastiproxy into your own project:
 import github.com/zackproser/procrastiproxy
 ```
 
-## Install procrastiproxy as a command using go
+**Install procrastiproxy as a command using go**
 
 Alternatively, you can install and use it as a command line interface (CLI) tool:
 
@@ -22,7 +22,7 @@ Alternatively, you can install and use it as a command line interface (CLI) tool
 go install github.com/zackproser/procrastiproxy
 ```
 
-## Install procrastiproxy as a command using the install script
+**Install procrastiproxy as a command using the install script**
 
 You can also run the install script to handle setup for you.
 
@@ -35,13 +35,20 @@ You can also run the install script to handle setup for you.
 ```bash
 go build -o procrastiproxy ./cmd
 
-./procrastiproxy --port 8001 --block reddit.com
+./procrastiproxy --port 8000 --block reddit.com
 ```
 
 You can pass multiple hosts for the `--block` flag. Just separate them with a comma like so:
 
 ```bash
-./procrastiproxy --port 8001 --block reddit.com,nytimes.com
+./procrastiproxy --port 8000 --block reddit.com,nytimes.com
+```
+
+You can test everything is working by telling curl to use your proxy when issuing requests:
+
+```bash
+# -x tells curl to use the URL that follows as a proxy
+curl -x http://localhost:8000 http://reddit.com
 ```
 
 # Features
@@ -63,7 +70,7 @@ Make a request to the `<server-root>/admin/` path, passing either `block` or `un
 ### Add a new host to the block list
 
 ```bash
-curl http://localhost:8001/admin/block/reddit.com
+curl http://localhost:8000/admin/block/reddit.com
 ```
 
 You'll receive a response indicating success:
@@ -75,7 +82,7 @@ Successfully added: reddit.com to the block list
 ### Remove a host from the block list
 
 ```bash
-curl http://localhost:8001/admin/unblock/reddit.com
+curl http://localhost:8000/admin/unblock/reddit.com
 ```
 
 You'll receive a response indicating success:
@@ -89,7 +96,7 @@ Successfully removed: reddit.com from the block list
 You can set your working hours by passing the `--block-start-time` and `--block-end-time` flags:
 
 ```bash
-procrastiproxy --block reddit.com,nytimes.com --block-start-time 4:00PM --block-end-time "5:00PM
+procrastiproxy --block reddit.com,nytimes.com --block-start-time 9:15AM --block-end-time 5:00PM
 ```
 
 If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed.
