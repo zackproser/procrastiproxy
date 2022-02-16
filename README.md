@@ -30,9 +30,17 @@ go install github.com/zackproser/procrastiproxy
 
 # Running locally
 
-`go build`
+```bash
+go build
 
-`./procrastiproxy --port 8001 --block reddit.com`
+./procrastiproxy --port 8001 --block reddit.com
+```
+
+You can pass multiple hosts for the `--block` flag. Just separate them with a comma like so:
+
+```bash
+./procrastiproxy --port 8001 --block reddit.com,nytimes.com
+```
 
 # Features
 
@@ -52,18 +60,42 @@ Make a request to the `<server-root>/admin/` path, passing either `block` or `un
 
 ### Add a new host to the block list
 
-`curl http://localhost:8001/admin/block/reddit.com`
+```bash
+curl http://localhost:8001/admin/block/reddit.com
+```
+
+You'll receive a response indicating success:
+
+```bash
+Successfully added: reddit.com to the block list
+```
 
 ### Remove a host from the block list
 
-`curl http://localhost:8001/admin/unblock/reddit.com`
+```bash
+curl http://localhost:8001/admin/unblock/reddit.com
+```
+
+You'll receive a response indicating success:
+
+```bash
+Successfully removed: reddit.com from the block list
+```
 
 ## Office hours
 
-You can set your working hours in your `.procrastiproxy.yaml` config file. If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed.
+You can set your working hours by passing the `--block-start-time` and `--block-end-time` flags:
+
+```bash
+procrastiproxy --block reddit.com,nytimes.com --block-start-time 4:00PM --block-end-time "5:00PM
+```
+
+If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed.
 
 # Running tests
 
-Procrastiproxy comes complete with tests to verify its functionality.
+Procrastiproxy comes complete with tests.
 
-`go test -v ./...`
+```bash
+go test -v ./...
+```
