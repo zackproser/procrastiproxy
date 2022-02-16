@@ -6,11 +6,15 @@ It implements an in-memory, mutable list for tracking hosts that should be block
 
 # Getting started
 
+## Use procrastiproxy as a library
+
 You can either import procrastiproxy into your own project:
 
 ```golang
 import github.com/zackproser/procrastiproxy
 ```
+
+## Install procrastiproxy as a command using go
 
 or, install and use it as a command line interface (CLI) tool:
 
@@ -18,17 +22,29 @@ or, install and use it as a command line interface (CLI) tool:
 go install github.com/zackproser/procrastiproxy
 ```
 
+## Install procrastiproxy as a command using the install script
+
+```bash
+./install.sh
+```
+
 # Running locally
 
 `go build`
 
-`./procrastiproxy 8001 --config .procrastiproxy.yaml`
+`./procrastiproxy --port 8001 --block reddit.com`
 
 # Features
 
 ## Configurable and dynamic block list
 
-The block list is in memory and is implemented as a map for fast lookups. You can set your baseline block list in `.procrastiproxy.yaml`. It can be modified at runtime via the admin control endpoints described below.
+The block list is in memory and is implemented as a map for fast lookups. You can set your baseline block list by passing the `--block` flag, like so:
+
+```bash
+procrastiproxy --port 3000 --block reddit.com,nytimes.com
+```
+
+It can be modified at runtime via the admin control endpoints described below.
 
 ## Admin control
 
