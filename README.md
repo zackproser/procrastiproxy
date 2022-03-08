@@ -6,7 +6,15 @@ It implements an in-memory, mutable list for tracking hosts that should be block
 
 # Getting started
 
-**Use procrastiproxy as a library**
+**Install with one command**
+
+To install procrastiproxy as a command-line interface (CLI) tool, you can execute the install script:
+
+```
+curl https://raw.githubusercontent.com/zackproser/procrastiproxy/main/install.sh | bash
+```
+
+**Install as a library**
 
 You can import procrastiproxy into your own project:
 
@@ -14,54 +22,25 @@ You can import procrastiproxy into your own project:
 import github.com/zackproser/procrastiproxy
 ```
 
-**Install procrastiproxy as a command using go**
+**Install via Go**
 
-Alternatively, you can install and use it as a command line interface (CLI) tool:
+You can install and use procrastiproxy as a command line interface (CLI) tool:
 
 ```bash
 go install github.com/zackproser/procrastiproxy
 ```
 
-**Install procrastiproxy as a command using the install script**
-
-You can also run the install script to handle setup for you.
-
-```bash
-./install.sh
-```
-
 # Running locally
 
-```bash
-go build -o procrastiproxy ./cmd
+`go build`
 
-./procrastiproxy --port 8000 --block reddit.com
-```
-
-You can pass multiple hosts for the `--block` flag. Just separate them with a comma like so:
-
-```bash
-./procrastiproxy --port 8000 --block reddit.com,nytimes.com
-```
-
-You can test everything is working by telling curl to use your proxy when issuing requests:
-
-```bash
-# -x tells curl to use the URL that follows as a proxy
-curl -x http://localhost:8000 http://reddit.com
-```
+`./procrastiproxy 8001 --config .procrastiproxy.yaml`
 
 # Features
 
 ## Configurable and dynamic block list
 
-The block list is in memory and is implemented as a map for fast lookups. You can set your baseline block list by passing the `--block` flag, like so:
-
-```bash
-procrastiproxy --port 3000 --block reddit.com,nytimes.com
-```
-
-It can be modified at runtime via the admin control endpoints described below.
+The block list is in memory and is implemented as a map for fast lookups. You can set your baseline block list in `.procrastiproxy.yaml`. It can be modified at runtime via the admin control endpoints described below.
 
 ## Admin control
 
@@ -69,42 +48,18 @@ Make a request to the `<server-root>/admin/` path, passing either `block` or `un
 
 ### Add a new host to the block list
 
-```bash
-curl http://localhost:8000/admin/block/reddit.com
-```
-
-You'll receive a response indicating success:
-
-```bash
-Successfully added: reddit.com to the block list
-```
+`curl http://localhost:8001/admin/block/reddit.com`
 
 ### Remove a host from the block list
 
-```bash
-curl http://localhost:8000/admin/unblock/reddit.com
-```
-
-You'll receive a response indicating success:
-
-```bash
-Successfully removed: reddit.com from the block list
-```
+`curl http://localhost:8001/admin/unblock/reddit.com`
 
 ## Office hours
 
-You can set your working hours by passing the `--block-start-time` and `--block-end-time` flags:
-
-```bash
-procrastiproxy --block reddit.com,nytimes.com --block-start-time 9:15AM --block-end-time 5:00PM
-```
-
-If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed. If you do not specify a start and end time to working hours, procrastiproxy will default to blocking mode between 9:00AM and 5:00PM in your local time.
+You can set your working hours in your `.procrastiproxy.yaml` config file. If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed.
 
 # Running tests
 
-Procrastiproxy comes complete with tests.
+Procrastiproxy comes complete with tests to verify its functionality.
 
-```bash
-go test -v ./...
-```
+`go test -v ./...`
