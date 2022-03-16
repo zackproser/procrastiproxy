@@ -47,8 +47,7 @@ func TestBlockHosts(t *testing.T) {
 
 		res, err := client.Get(tc.URL)
 		if err != nil {
-			t.Logf("Error attempting to fetch test server URL: %v\n", err)
-			t.Fail()
+			t.Fatalf("Error attempting to fetch test server URL: %v\n", err)
 		}
 		if res.StatusCode != tc.WantHTTPStatusCode {
 			t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", tc.WantHTTPStatusCode, tc.URL, res.StatusCode)
