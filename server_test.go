@@ -7,14 +7,14 @@ import (
 	"testing"
 )
 
-func TestBlockHosts(t *testing.T) {
-
+// setupTestServer is a convenience method for creating a test backend that we can make
+// HTTP requests to
+func setupTestServer(t *testing.T) (*http.Client, *httptest.Server, error) {
 	// Create a test backend that wraps our proxyHandler. This test backend
 	// can then be sent various HTTP requests in test cases
 	backend := httptest.NewServer(http.HandlerFunc(blockListAwareHandler))
-	defer backend.Close()
 
-	proxyUrl, err := url.Parse(backend.URL)
+	proxyURL, err := url.Parse(backend.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,35 +23,59 @@ func TestBlockHosts(t *testing.T) {
 	// test our proxy's functionality
 	client := &http.Client{
 		Transport: &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
+			Proxy: http.ProxyURL(proxyURL),
 		},
 	}
 
-	type TestCase struct {
-		BlockedHosts       []string
-		URL                string
-		WantHTTPStatusCode int
+	return client, backend, nil
+}
+
+// TestDeniedBlockHosts adds a host to the block list and then immediately attempts to make
+// a request to that host, which should be denied by procrastiproxy
+func TestDeniesBlockedHost(t *testing.T) {
+	client, backend, err := setupTestServer(t)
+	defer backend.Close()
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	testCases := []TestCase{
-		{BlockedHosts: []string{"reddit.com"}, URL: "http://reddit.com", WantHTTPStatusCode: http.StatusForbidden},
-		{BlockedHosts: []string{"nytimes.com"}, URL: "http://wikipedia.org", WantHTTPStatusCode: http.StatusOK},
+	blockedHost := "reddit.com"
+	testURL := "http://reddit.com"
+
+	AddHostToBlockList(blockedHost)
+
+	res, err := client.Get(testURL)
+	if err != nil {
+		t.Fatalf("Error attempting to fetch test server URL: %v\n", err)
+	}
+	if res.StatusCode != http.StatusForbidden {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusForbidden, testURL, res.StatusCode)
+		t.Fail()
+	}
+}
+
+// TestAllowsWhitelistedHost ensures that a host that has not been explicitly blocked
+// can be reached through procrastiproxy
+func TestAllowsWhitelistedHost(t *testing.T) {
+
+	client, backend, err := setupTestServer(t)
+	defer backend.Close()
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	for _, tc := range testCases {
+	blockedHost := "nytimes.com"
+	testURL := "http://wikipedia.org"
 
-		// Set the blocked hosts config variable that is used by the proxy backend
-		for _, host := range tc.BlockedHosts {
-			AddHostToBlockList(host)
-		}
+	// Set the blocked hosts config variable that is used by the proxy backend
+	AddHostToBlockList(blockedHost)
 
-		res, err := client.Get(tc.URL)
-		if err != nil {
-			t.Fatalf("Error attempting to fetch test server URL: %v\n", err)
-		}
-		if res.StatusCode != tc.WantHTTPStatusCode {
-			t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", tc.WantHTTPStatusCode, tc.URL, res.StatusCode)
-			t.Fail()
-		}
+	res, err := client.Get(testURL)
+	if err != nil {
+		t.Fatalf("Error attempting to fetch test server URL: %v\n", err)
+	}
+	if res.StatusCode != http.StatusOK {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, res.StatusCode)
+		t.Fail()
 	}
 }
