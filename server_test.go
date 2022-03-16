@@ -5,8 +5,6 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func TestBlockHosts(t *testing.T) {
@@ -49,7 +47,8 @@ func TestBlockHosts(t *testing.T) {
 
 		res, err := client.Get(tc.URL)
 		if err != nil {
-			log.Fatal(err)
+			t.Logf("Error attempting to fetch test server URL: %v\n", err)
+			t.Fail()
 		}
 		if res.StatusCode != tc.WantHTTPStatusCode {
 			t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", tc.WantHTTPStatusCode, tc.URL, res.StatusCode)
