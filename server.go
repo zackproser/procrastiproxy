@@ -22,7 +22,7 @@ func RunServer(args []string) {
 	port := args[0]
 	log.WithFields(logrus.Fields{
 		"Port": port,
-	}).Info("Proxy listening...")
+	}).Info("Starting server on port...")
 
 	http.HandleFunc("/", timeAwareHandler)
 	http.HandleFunc("/admin/", adminHandler)
