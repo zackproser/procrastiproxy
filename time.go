@@ -67,9 +67,8 @@ var now = time.Now
 func (p *Procrastiproxy) WithinBlockWindow() bool {
 
 	check := p.Now()
-	//fmt.Printf("check: %v\n", check)
+
 	pts := p.GetProxyTimeSettings()
-	//fmt.Printf("pts: %v\n", pts)
 
 	startTimeString := pts.BlockStartTime
 	endTimeString := pts.BlockEndTime
