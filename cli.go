@@ -50,14 +50,15 @@ func RunCLI() error {
 
 	parseBlockListInput(blockList)
 
+	p := NewProcrastiproxy()
 	// Configure proxy time-based block settings
-	ConfigureProxyTimeSettings(*blockStartTime, *blockEndTime)
+	p.ConfigureProxyTimeSettings(*blockStartTime, *blockEndTime)
 
 	if *port == "" {
 		return errors.New("You must supply a valid port via the --port flag")
 	}
 	if *blockList == "" {
-		log.Info("No blocked sites configured because an empty --block flag was passed. Proxy will allow all trafic.")
+		log.Info("Proxy will allow all traffic, because you did not supply any sites to block via the --block flag")
 	}
 	args := []string{*port, *blockList}
 	RunServer(args)

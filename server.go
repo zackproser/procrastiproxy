@@ -20,12 +20,15 @@ func hostIsBlocked(host string) bool {
 
 func RunServer(args []string) {
 	port := args[0]
+
+	p := NewProcrastiproxy()
+
 	log.WithFields(logrus.Fields{
 		"Port": port,
 	}).Info("Starting server on port...")
 
-	http.HandleFunc("/", timeAwareHandler)
-	http.HandleFunc("/admin/", adminHandler)
+	http.HandleFunc("/", p.timeAwareHandler)
+	http.HandleFunc("/admin/", p.adminHandler)
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

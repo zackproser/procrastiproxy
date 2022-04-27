@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
@@ -65,17 +64,17 @@ func parseCommandFromPath(path string) (*AdminCommand, error) {
 	return aCmd, nil
 }
 
-func timeAwareHandler(w http.ResponseWriter, r *http.Request) {
-	if WithinBlockWindow(time.Now().Local(), GetProxyTimeSettings()) {
+func (p *Procrastiproxy) timeAwareHandler(w http.ResponseWriter, r *http.Request) {
+	if p.WithinBlockWindow() {
 		log.Info("Request made within block time window. Examining if host permitted..")
-		blockListAwareHandler(w, r)
+		p.blockListAwareHandler(w, r)
 		return
 	}
 	log.Info("Request made outside of configured block time window. Passing through...")
 	proxyHandler(w, r)
 }
 
-func blockListAwareHandler(w http.ResponseWriter, r *http.Request) {
+func (p *Procrastiproxy) blockListAwareHandler(w http.ResponseWriter, r *http.Request) {
 	host := sanitizeHost(r.URL.Host)
 	if hostIsBlocked(host) {
 		blockRequest(w)
@@ -84,7 +83,7 @@ func blockListAwareHandler(w http.ResponseWriter, r *http.Request) {
 	makeProxyRequest(w, r)
 }
 
-func adminHandler(w http.ResponseWriter, r *http.Request) {
+func (p *Procrastiproxy) adminHandler(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(logrus.Fields{
 		"Path": r.URL.Path,
 	}).Debug("Admin handler received request")

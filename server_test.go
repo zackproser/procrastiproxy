@@ -10,9 +10,10 @@ import (
 // setupTestServer is a convenience method for creating a test backend that we can make
 // HTTP requests to
 func setupTestServer(t *testing.T) (*http.Client, *httptest.Server, error) {
+	p := NewProcrastiproxy()
 	// Create a test backend that wraps our proxyHandler. This test backend
 	// can then be sent various HTTP requests in test cases
-	backend := httptest.NewServer(http.HandlerFunc(blockListAwareHandler))
+	backend := httptest.NewServer(http.HandlerFunc(p.blockListAwareHandler))
 
 	proxyURL, err := url.Parse(backend.URL)
 	if err != nil {

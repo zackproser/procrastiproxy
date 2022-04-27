@@ -1,9 +1,10 @@
 package procrastiproxy
 
 import (
+	"fmt"
+	"os"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,7 +23,7 @@ type ProxyTimeSettings struct {
 	DefaultLayout  string
 }
 
-func ConfigureProxyTimeSettings(bts, bet string) {
+func (p *Procrastiproxy) ConfigureProxyTimeSettings(bts, bet string) {
 
 	pts := ProxyTimeSettings{}
 	if bts != "" {
@@ -37,33 +38,39 @@ func ConfigureProxyTimeSettings(bts, bet string) {
 	}
 	pts.DefaultLayout = defaultLayout
 
-	// Configure specified time zone
-	log.WithFields(logrus.Fields{
-		"Start block time": pts.BlockStartTime,
-		"End block time":   pts.BlockEndTime,
-	}).Infof("Successfully configured time settings")
-
-	proxyTimeSettings = pts
+	p.ProxyTimeSettings = pts
 }
 
-func GetProxyTimeSettings() ProxyTimeSettings {
-	if proxyTimeSettings == (ProxyTimeSettings{}) {
+func (p *Procrastiproxy) GetProxyTimeSettings() ProxyTimeSettings {
+	if p.ProxyTimeSettings == (ProxyTimeSettings{}) {
 		// we haven't configured the settings and set the variable yet
-		ConfigureProxyTimeSettings(defaultBlockStartTime, defaultBlockEndTime)
-		return proxyTimeSettings
+		p.ConfigureProxyTimeSettings(defaultBlockStartTime, defaultBlockEndTime)
+		return p.ProxyTimeSettings
 	}
-	return proxyTimeSettings
+	return p.ProxyTimeSettings
 }
 
 func stringToTime(str string) time.Time {
+	if str == "" {
+		fmt.Println("its empty")
+		os.Exit(1)
+	}
 	tm, err := time.Parse(time.Kitchen, str)
 	if err != nil {
-		log.Info("Failed to decode time:", err)
+		log.Infof("Failed to decode time: %s - error: %v\n", str, err)
 	}
 	return tm
 }
 
-func WithinBlockWindow(check time.Time, pts ProxyTimeSettings) bool {
+var now = time.Now
+
+func (p *Procrastiproxy) WithinBlockWindow() bool {
+
+	check := p.Now()
+	//fmt.Printf("check: %v\n", check)
+	pts := p.GetProxyTimeSettings()
+	//fmt.Printf("pts: %v\n", pts)
+
 	startTimeString := pts.BlockStartTime
 	endTimeString := pts.BlockEndTime
 
