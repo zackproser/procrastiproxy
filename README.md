@@ -4,6 +4,15 @@ Procrastiproxy is a proxy designed to help you focus during the day by blocking 
 
 It implements an in-memory, mutable list for tracking hosts that should be blocked by the proxy. This in-memory list allows for fast (`O(1)` or "constant time") look-ups.
 
+```mermaid
+graph TD
+A[User] -->|Itches to browse something distracting| B(GET reddit.com/)
+B --> C(Procrastiproxy)
+C --> D{Should this request be allowed?}
+D -->|It's not working hours| E(Allow Request)
+D -->|It's time to work!| F(Access denied!)
+```
+
 # Getting started
 
 **Install with one command**
