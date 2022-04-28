@@ -65,10 +65,10 @@ Make a request to the `<server-root>/admin/` path, passing either `block` or `un
 
 ## Office hours
 
-You can set your working hours in your `.procrastiproxy.yaml` config file. If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed.
+If a request is made to procrastiproxy within the configured office hours, the request will be examined and blocked if its host is on the block list. If a request is made to procrastiproxy outside of the configured office hours, it will be allowed.
 
 # Running tests
 
 Procrastiproxy comes complete with tests to verify its functionality.
 
-`go test -v ./...`
+`go test`
