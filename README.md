@@ -1,8 +1,8 @@
 # Overview
 
-Procrastiproxy is a proxy designed to help you focus during the day by blocking distracting websites.
+Procrastiproxy is a simple, configurable proxy that helps you focus by blocking distracting websites.
 
-It implements an in-memory, mutable list for tracking hosts that should be blocked by the proxy. This in-memory list allows for fast (`O(1)` or "constant time") look-ups.
+It implements an in-memory, mutable list for tracking hosts that should be blocked. This in-memory list allows for fast (`O(1)` or "constant time") look-ups of blocked hosts.
 
 ```mermaid
 graph TD
