@@ -43,7 +43,7 @@ go install github.com/zackproser/procrastiproxy
 
 `go build`
 
-`./procrastiproxy 8001 --config .procrastiproxy.yaml`
+`./procrastiproxy 8001`
 
 # Features
 
