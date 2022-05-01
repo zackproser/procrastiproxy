@@ -17,7 +17,7 @@ package main
 
 import (
 	"fmt"
-	"procrastiproxy"
+	"github.com/zackproser/procrastiproxy"
 )
 
 func main() {
