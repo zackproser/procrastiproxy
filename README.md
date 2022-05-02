@@ -49,7 +49,7 @@ go install github.com/zackproser/procrastiproxy
 
 ## Configurable and dynamic block list
 
-The block list is in memory and is implemented as a map for fast lookups. You can set your baseline block list in `.procrastiproxy.yaml`. It can be modified at runtime via the admin control endpoints described below.
+The block list is kept in-memory and is implemented as a map for fast lookups. You can set your baseline block list in `.procrastiproxy.yaml`. It can be modified at runtime via the admin control endpoints described below.
 
 ## Admin control
 
