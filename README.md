@@ -1,8 +1,7 @@
 # Overview
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/zackproser/procrastiproxy)](https://goreportcard.com/report/github.com/zackproser/procrastiproxy)
-
-[![CircleCI](https://circleci.com/gh/zackproser/procrastiproxy.svg?style=svg)](https://circleci.com/gh/zackproser/procrastiproxy)
+[![CircleCI](https://circleci.com/gh/zackproser/procrastiproxy.svg?style=shield)](https://circleci.com/gh/zackproser/procrastiproxy)
 
 Procrastiproxy is a simple, configurable proxy that helps you focus by blocking distracting websites.
 
