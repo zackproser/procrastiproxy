@@ -8,7 +8,6 @@ builds:
       - 386
       - amd64
       - arm
-      - arm64
 archives:
   - format: tar.gz
     replacements:
@@ -17,3 +16,4 @@ archives:
       - goos: windows
         format: zip
     name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}--{{.Arch}}"
+    wrap_in_directory: true
