@@ -39,11 +39,11 @@ You can install and use procrastiproxy as a command line interface (CLI) tool:
 go install github.com/zackproser/procrastiproxy
 ```
 
-# Running locally
+**Build from source and run locally**
 
 `go build`
 
-`./procrastiproxy 8001`
+`./procrastiproxy --port 8001`
 
 # Features
 
