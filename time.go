@@ -1,8 +1,6 @@
 package procrastiproxy
 
 import (
-	"fmt"
-	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -50,19 +48,15 @@ func (p *Procrastiproxy) GetProxyTimeSettings() ProxyTimeSettings {
 	return p.ProxyTimeSettings
 }
 
+// stringToTime accepts a string representation of a timestamp and attempts to convert it to
+// a time in the "Kitchen" format, e.g., 3:04PM
 func stringToTime(str string) time.Time {
-	if str == "" {
-		fmt.Println("its empty")
-		os.Exit(1)
-	}
 	tm, err := time.Parse(time.Kitchen, str)
 	if err != nil {
 		log.Infof("Failed to decode time: %s - error: %v\n", str, err)
 	}
 	return tm
 }
-
-var now = time.Now
 
 func (p *Procrastiproxy) WithinBlockWindow() bool {
 
