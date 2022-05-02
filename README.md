@@ -2,6 +2,8 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/zackproser/procrastiproxy)](https://goreportcard.com/report/github.com/zackproser/procrastiproxy)
 
+[![CircleCI](https://circleci.com/gh/zackproser/procrastiproxy.svg?style=svg)](https://circleci.com/gh/zackproser/procrastiproxy)
+
 Procrastiproxy is a simple, configurable proxy that helps you focus by blocking distracting websites.
 
 It implements an in-memory, mutable list for tracking hosts that should be blocked. This in-memory list allows for fast (`O(1)` or "constant time") look-ups of blocked hosts.
