@@ -54,7 +54,7 @@ go install github.com/zackproser/procrastiproxy
 
 **Build from source and run locally**
 
-`go build`
+`go build -o procrastiproxy ./cmd`
 
 `./procrastiproxy --port 8001`
 
