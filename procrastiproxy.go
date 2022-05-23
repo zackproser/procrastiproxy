@@ -1,6 +1,9 @@
 package procrastiproxy
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 var procrastiproxy *Procrastiproxy
 
@@ -23,4 +26,12 @@ func NewProcrastiproxy() *Procrastiproxy {
 		Now: DefaultNow,
 	}
 	return procrastiproxy
+}
+
+// custom errors
+
+type EmptyBlockListError struct{}
+
+func (err EmptyBlockListError) Error() string {
+	return fmt.Sprint("You must supply at least one valid HTTP host to procrastiproxy via the --block flag. Example: --block reddit.com")
 }

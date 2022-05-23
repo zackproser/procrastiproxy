@@ -62,3 +62,9 @@ func (l *List) Contains(item string) bool {
 	defer l.m.Unlock()
 	return l.members[item]
 }
+
+func (l *List) Length() int {
+	l.m.Lock()
+	defer l.m.Unlock()
+	return len(l.members)
+}

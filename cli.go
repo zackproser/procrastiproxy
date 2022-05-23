@@ -42,7 +42,10 @@ func RunCLI() error {
 	}
 	log.SetLevel(level)
 
-	parseBlockListInput(blockList)
+	parseErr := parseBlockListInput(blockList)
+	if parseErr != nil {
+		return parseErr
+	}
 
 	p := NewProcrastiproxy()
 	// Configure proxy time-based block settings

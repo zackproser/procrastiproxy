@@ -24,7 +24,8 @@ func RunServer(args []string) {
 	p := NewProcrastiproxy()
 
 	log.WithFields(logrus.Fields{
-		"Port": port,
+		"Port":                    port,
+		"Number of sites blocked": GetList().Length(),
 	}).Info("Starting server on port...")
 
 	http.HandleFunc("/", p.timeAwareHandler)
