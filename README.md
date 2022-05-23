@@ -5,7 +5,17 @@
 
 Procrastiproxy is a simple, configurable proxy that helps you focus by blocking distracting websites.
 
-It implements an in-memory, mutable list for tracking hosts that should be blocked. This in-memory list allows for fast (`O(1)` or "constant time") look-ups of blocked hosts.
+```
+curl https://raw.githubusercontent.com/zackproser/procrastiproxy/main/install.sh | bash
+```
+
+Example: block reddit and twitter during work hours
+
+```
+procrastiproxy --block reddit.com,twitter.com
+```
+
+Procrastiproxy implements an in-memory, mutable list for tracking hosts that should be blocked. This in-memory list allows for fast (`O(1)` or "constant time") look-ups of blocked hosts.
 
 ```mermaid
 graph TD
