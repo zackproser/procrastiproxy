@@ -26,14 +26,8 @@ var (
 	logLevel string
 )
 
-func outputHelp() {
-
-}
-
 // RunCLI is the main entrypoint for the procrastiproxy package
 func RunCLI() error {
-
-	flag.Usage = outputHelp
 
 	port := flag.String("port", "8000", "Port to listen on. Defaults to 8000")
 	logLevel := flag.String("loglevel", "info", "Log level. Defaults to Info")
