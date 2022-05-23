@@ -3,17 +3,7 @@ package procrastiproxy
 import (
 	"testing"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
-
-func parseTime(timeString string) time.Time {
-	parsed, err := time.Parse(time.Kitchen, timeString)
-	if err != nil {
-		log.Info("Error parsing time string:", err)
-	}
-	return parsed
-}
 
 func TestWithinBlockWindow(t *testing.T) {
 	type TestCase struct {

@@ -1,6 +1,11 @@
 package procrastiproxy
 
-import "strings"
+import (
+	"strings"
+	"time"
+
+	log "github.com/sirupsen/logrus"
+)
 
 func parseBlockListInput(blockList *string) {
 	var blockListMembers []string
@@ -32,4 +37,12 @@ func includes(haystack []string, needle string) bool {
 		}
 	}
 	return false
+}
+
+func parseTime(timeString string) time.Time {
+	parsed, err := time.Parse(time.Kitchen, timeString)
+	if err != nil {
+		log.Info("Error parsing time string:", err)
+	}
+	return parsed
 }
