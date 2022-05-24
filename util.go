@@ -57,7 +57,7 @@ func includes(haystack []string, needle string) bool {
 func parseTime(timeString string) time.Time {
 	parsed, err := time.Parse(time.Kitchen, timeString)
 	if err != nil {
-		log.Info("Error parsing time string:", err)
+		log.Debug("Error parsing time string:", err)
 	}
 	return parsed
 }

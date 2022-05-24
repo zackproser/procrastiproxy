@@ -53,7 +53,7 @@ func (p *Procrastiproxy) GetProxyTimeSettings() ProxyTimeSettings {
 func stringToTime(str string) time.Time {
 	tm, err := time.Parse(time.Kitchen, str)
 	if err != nil {
-		log.Infof("Failed to decode time: %s - error: %v\n", str, err)
+		log.Debugf("Failed to decode time: %s - error: %v\n", str, err)
 	}
 	return tm
 }

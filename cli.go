@@ -55,7 +55,7 @@ func RunCLI() error {
 		return errors.New("You must supply a valid port via the --port flag")
 	}
 	if *blockList == "" {
-		log.Info("Proxy will allow all traffic, because you did not supply any sites to block via the --block flag")
+		log.Debug("Proxy will allow all traffic, because you did not supply any sites to block via the --block flag")
 	}
 	args := []string{*port, *blockList}
 	RunServer(args)

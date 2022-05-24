@@ -56,7 +56,7 @@ func parseCommandFromPath(path string) (*AdminCommand, error) {
 		aCmd.Command = pathElem[2]
 	}
 	url, parseErr := url.Parse(pathElem[3])
-	log.Printf("Parsed URL: %s\n", url.String())
+	log.Debugf("Parsed URL: %s\n", url.String())
 	if parseErr != nil {
 		return aCmd, parseErr
 	}
@@ -66,11 +66,11 @@ func parseCommandFromPath(path string) (*AdminCommand, error) {
 
 func (p *Procrastiproxy) timeAwareHandler(w http.ResponseWriter, r *http.Request) {
 	if p.WithinBlockWindow() {
-		log.Info("Request made within block time window. Examining if host permitted..")
+		log.Debug("Request made within block time window. Examining if host permitted..")
 		p.blockListAwareHandler(w, r)
 		return
 	}
-	log.Info("Request made outside of configured block time window. Passing through...")
+	log.Debug("Request made outside of configured block time window. Passing through...")
 	proxyHandler(w, r)
 }
 
