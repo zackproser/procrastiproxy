@@ -77,6 +77,7 @@ func (p *Procrastiproxy) timeAwareHandler(w http.ResponseWriter, r *http.Request
 func (p *Procrastiproxy) blockListAwareHandler(w http.ResponseWriter, r *http.Request) {
 	host := sanitizeHost(r.URL.Host)
 	if hostIsBlocked(host) {
+		log.Debugf("Blocking request to host: %s. User explicitly blocked and present time is within configured proxy block window", host)
 		blockRequest(w)
 		return
 	}
