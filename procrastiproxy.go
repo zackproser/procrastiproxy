@@ -35,3 +35,13 @@ type EmptyBlockListError struct{}
 func (err EmptyBlockListError) Error() string {
 	return fmt.Sprint("You must supply at least one valid HTTP host to procrastiproxy via the --block flag. Example: --block reddit.com")
 }
+
+type InvalidTimeFormatError struct {
+	FlagName   string
+	Value      string
+	Underlying error
+}
+
+func (err InvalidTimeFormatError) Error() string {
+	return fmt.Sprintf("Invalid time value {%s} passed with flag {%s}. Format must be time.Kitchen: e.g., 9:15AM. Parse error: %v", err.Value, err.FlagName, err.Underlying)
+}

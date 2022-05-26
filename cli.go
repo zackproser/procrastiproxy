@@ -34,6 +34,7 @@ func RunCLI() error {
 	blockList := flag.String("block", "", "Host to block. Defaults to none")
 	blockStartTime := flag.String("block-start-time", defaultBlockStartTime, "Start of business hours. Defaults to 9:00AM")
 	blockEndTime := flag.String("block-end-time", defaultBlockEndTime, "End of business hours. Defaults to 5:00PM")
+
 	flag.Parse()
 
 	level, err := log.ParseLevel(*logLevel)
@@ -42,8 +43,11 @@ func RunCLI() error {
 	}
 	log.SetLevel(level)
 
-	parseErr := parseBlockListInput(blockList)
-	if parseErr != nil {
+	if parseErr := parseBlockListInput(blockList); parseErr != nil {
+		return parseErr
+	}
+
+	if parseErr := parseStartAndStopTimes(*blockStartTime, *blockEndTime); parseErr != nil {
 		return parseErr
 	}
 

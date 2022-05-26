@@ -5,6 +5,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/hashicorp/go-multierror"
 )
 
 func validateBlockListInput(blockListMembers []string) error {
@@ -31,6 +33,34 @@ func parseBlockListInput(blockList *string) error {
 	}
 
 	return nil
+}
+
+type timeFlag struct {
+	Name  string
+	Value string
+}
+
+func parseStartAndStopTimes(blockTimeStart, blockTimeEnd string) error {
+
+	var result *multierror.Error
+
+	timeFlags := []timeFlag{
+		{
+			Name:  "block-time-start",
+			Value: blockTimeStart,
+		},
+		{
+			Name:  "block-time-end",
+			Value: blockTimeEnd,
+		},
+	}
+
+	for _, timeFlag := range timeFlags {
+		if _, parseErr := time.Parse(time.Kitchen, timeFlag.Value); parseErr != nil {
+			result = multierror.Append(result, InvalidTimeFormatError{FlagName: timeFlag.Name, Value: timeFlag.Value, Underlying: parseErr})
+		}
+	}
+	return result.ErrorOrNil()
 }
 
 // Build the fast, in-memory list of blocked hosts from the configured values
