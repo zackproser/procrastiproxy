@@ -23,9 +23,7 @@ func setupTestServer(t *testing.T) (*http.Client, *httptest.Server, error) {
 	// Create a client that will use our procrastiproxy as a proxy, so that we can
 	// test our proxy's functionality
 	client := &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyURL(proxyURL),
-		},
+		Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)},
 	}
 
 	return client, backend, nil
