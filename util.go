@@ -1,10 +1,9 @@
 package procrastiproxy
 
 import (
+	"sort"
 	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/hashicorp/go-multierror"
 )
@@ -40,7 +39,7 @@ type timeFlag struct {
 	Value string
 }
 
-func parseStartAndStopTimes(blockTimeStart, blockTimeEnd string) error {
+func parseStartAndEndTimes(blockTimeStart, blockTimeEnd string) error {
 
 	var result *multierror.Error
 
@@ -71,23 +70,22 @@ func AddHostToBlockList(hosts ...string) {
 	}
 }
 
-func GetBlockedHosts() []string {
-	return GetList().All()
-}
+func SlicesAreEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
 
-func includes(haystack []string, needle string) bool {
-	for _, member := range haystack {
-		if member == needle {
-			return true
+	z := sort.StringSlice(a)
+	y := sort.StringSlice(b)
+
+	z.Sort()
+	y.Sort()
+
+	for i := range z {
+		if z[i] != y[i] {
+			return false
 		}
 	}
-	return false
-}
 
-func parseTime(timeString string) time.Time {
-	parsed, err := time.Parse(time.Kitchen, timeString)
-	if err != nil {
-		log.Debug("Error parsing time string:", err)
-	}
-	return parsed
+	return true
 }

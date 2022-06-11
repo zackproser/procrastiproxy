@@ -58,28 +58,29 @@ func stringToTime(str string) time.Time {
 	return tm
 }
 
-func (p *Procrastiproxy) WithinBlockWindow() bool {
-
-	check := p.Now()
+func (p *Procrastiproxy) WithinBlockWindow(now time.Time) bool {
 
 	pts := p.GetProxyTimeSettings()
 
 	startTimeString := pts.BlockStartTime
 	endTimeString := pts.BlockEndTime
 
-	timeNowString := check.Format(time.Kitchen)
-	timeNow := stringToTime(timeNowString)
-
 	start := stringToTime(startTimeString)
 	end := stringToTime(endTimeString)
 
-	if timeNow.Before(start) || timeNow.After(end) {
+	// Create an equivalent unix epoch timestamp, but use now's hour, minutes and seconds
+	checkTime := time.Date(int(0000), time.January, int(1), now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), time.UTC)
+
+	log.Debugf("startTime: %v endTime: %v currentTime: %v", start, end, checkTime)
+
+	if checkTime.Before(start) {
 		return false
 	}
 
-	if timeNow.Before(end) {
+	if checkTime.Before(end) {
 		return true
 	}
 
-	return true
+	return false
+
 }

@@ -47,7 +47,7 @@ func RunCLI() error {
 		return parseErr
 	}
 
-	if parseErr := parseStartAndStopTimes(*blockStartTime, *blockEndTime); parseErr != nil {
+	if parseErr := parseStartAndEndTimes(*blockStartTime, *blockEndTime); parseErr != nil {
 		return parseErr
 	}
 

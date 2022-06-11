@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
@@ -65,7 +66,7 @@ func parseCommandFromPath(path string) (*AdminCommand, error) {
 }
 
 func (p *Procrastiproxy) timeAwareHandler(w http.ResponseWriter, r *http.Request) {
-	if p.WithinBlockWindow() {
+	if p.WithinBlockWindow(time.Now()) {
 		log.Debug("Request made within block time window. Examining if host permitted..")
 		p.blockListAwareHandler(w, r)
 		return

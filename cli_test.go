@@ -3,7 +3,14 @@ package procrastiproxy
 import (
 	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
+
+func TestRunCLIWithoutRequiredInputsErrors(t *testing.T) {
+	err := RunCLI()
+	require.Error(t, err)
+}
 
 func TestInvalidTimeFlagsRejected(t *testing.T) {
 	type TestCase struct {
@@ -41,7 +48,7 @@ func TestInvalidTimeFlagsRejected(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 
-			err := parseStartAndStopTimes(tc.BlockTimeStart, tc.BlockTimeEnd)
+			err := parseStartAndEndTimes(tc.BlockTimeStart, tc.BlockTimeEnd)
 
 			if tc.Want == nil && err == nil {
 				return
