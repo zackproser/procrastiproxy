@@ -18,11 +18,11 @@ workflows:
 
 store_test_logs: &store_test_logs
   store_artifacts:
-    path: /tmp/logs
+    path: /tmp/logs/test.log
 
 store_test_results: &store_test_results
   store_test_results:
-    path: /tmp/logs
+    path: /tmp/logs/test.log
 
 jobs:
   test:
@@ -34,7 +34,7 @@ jobs:
           name: run tests
           command: |
             mkdir -p /tmp/logs
-            go test -v ./... --timeout 45m | tee /tmp/logs/
+            go test -v ./... --timeout 45m | tee /tmp/logs/test.log
           # Tolerate a 4 minute window of no output
           no_output_timeout: 240s
       - *store_test_logs
