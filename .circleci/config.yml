@@ -54,6 +54,8 @@ jobs:
           name: run tests
           command: |
             mkdir -p /tmp/logs
+            # Make Go available in the PATH upon first being installed
+            echo 'export PATH="/usr/local/opt/go@1.17/bin:$PATH"' >> /Users/distiller/.bash_profile
             go test -v ./... --timeout 5m | tee /tmp/logs/test.log
   release:
     docker:
