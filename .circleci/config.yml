@@ -9,6 +9,7 @@ workflows:
     jobs:
       - test
       - test-windows
+      - test-mac
       - release:
           # Only run this job on git tag pushes
           filters:
@@ -41,7 +42,21 @@ jobs:
       - checkout
       - attach_workspace:
           at: script
-      - run: go test
+      - run: go test -v ./...
+  
+  test-mac:
+    macos:
+      xcode: 12.5.1
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - checkout
+      - run: brew install go@1.17
+      - run: 
+          name: run tests
+          command: |
+            mkdir -p /tmp/logs
+            go test -v ./... --timeout 5m | tee /tmp/logs/test.log
   release:
     docker:
       - image: cimg/go:1.17
