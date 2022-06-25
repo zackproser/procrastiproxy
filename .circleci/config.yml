@@ -7,10 +7,8 @@ orbs:
 workflows:
   main:
     jobs:
-      - test:
-          filters:
-            tags:
-              only: /^v.*/
+      - test
+      - test-windows
       - release:
           # Only run this job on git tag pushes
           filters:
