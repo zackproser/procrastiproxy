@@ -1,5 +1,9 @@
 # .circleci/config.yml
 version: 2.1
+
+orbs:
+  windows: circleci/windows@2.4.1
+
 workflows:
   main:
     jobs:
@@ -32,6 +36,14 @@ jobs:
           path: /tmp/logs 
       - store_test_results: 
           path: /tmp/logs 
+  test-windows:
+    executor:
+      name: windows/default
+    steps:
+      - checkout
+      - attach_workspace:
+          at: script
+      - run: go test
   release:
     docker:
       - image: cimg/go:1.17
