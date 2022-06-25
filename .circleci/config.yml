@@ -43,19 +43,22 @@ jobs:
       - attach_workspace:
           at: script
       - run: go test -v ./...
-  
+
   test-mac:
     macos:
       xcode: 12.5.1
     steps:
       - checkout
-      - run: brew install go@1.17
       - run: 
+         name: install go 
+         command: |
+           brew install go@1.17
+           # Make Go available in the PATH upon first being installed
+           echo 'export PATH="/usr/local/opt/go@1.17/bin:$PATH"' >> /Users/distiller/.bash_profile
+      - run:
           name: run tests
           command: |
             mkdir -p /tmp/logs
-            # Make Go available in the PATH upon first being installed
-            echo 'export PATH="/usr/local/opt/go@1.17/bin:$PATH"' >> /Users/distiller/.bash_profile
             go test -v ./... --timeout 5m | tee /tmp/logs/test.log
   release:
     docker:
