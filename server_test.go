@@ -4,169 +4,172 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-func setupTestServer(t *testing.T, handlerFunc func(http.ResponseWriter, *http.Request)) (*http.Client, *httptest.Server, error) {
-	// Create a test backend that wraps our blockListAwareHandler. This test backend
-	// can then be sent various HTTP requests in test cases
-	backend := httptest.NewServer(http.HandlerFunc(handlerFunc))
+// TestHostBlocking ensures that you can access a host via the block list aware handler before it is added to the block list,
+// but not after it is added to the block list
+func TestHostBlocking(t *testing.T) {
+	t.Parallel()
 
-	proxyURL, err := url.Parse(backend.URL)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Create a client that will use our procrastiproxy as a proxy, so that we can
-	// test our proxy's functionality
-	client := &http.Client{
-		Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)},
-	}
-
-	return client, backend, nil
-
-}
-
-func setupBlockListAwareServer(t *testing.T) (*http.Client, *httptest.Server, error) {
-	return setupTestServer(t, NewProcrastiproxy().blockListAwareHandler)
-}
-
-func setupProxyTestServer(t *testing.T) (*http.Client, *httptest.Server, error) {
-	return setupTestServer(t, proxyHandler)
-}
-
-func setupAdminTestServer(t *testing.T) (*http.Client, *httptest.Server, error) {
-	return setupTestServer(t, NewProcrastiproxy().adminHandler)
-}
-
-// TestDeniedBlockHosts adds a host to the block list and then immediately attempts to make
-// a request to that host, which should be denied by procrastiproxy
-func TestDeniesBlockedHost(t *testing.T) {
-	client, backend, err := setupBlockListAwareServer(t)
-	defer backend.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
+	p := NewProcrastiproxy()
 
 	blockedHost := "reddit.com"
 	testURL := "http://reddit.com"
 
-	AddHostToBlockList(blockedHost)
+	// First, ensure that the target host can be reached before it is added to the block list
+	fr := httptest.NewRequest("GET", testURL, strings.NewReader(""))
 
-	res, err := client.Get(testURL)
-	if err != nil {
-		t.Fatalf("Error attempting to fetch test server URL: %v\n", err)
+	fw := httptest.NewRecorder()
+
+	http.HandlerFunc(p.blockListAwareHandler).ServeHTTP(fw, fr)
+
+	if fw.Code != http.StatusOK {
+		t.Logf("Wanted HTTP StatusCode: %d for URL prior to adding host to block list: %s but got: %d\n", http.StatusOK, testURL, fw.Code)
 	}
-	if res.StatusCode != http.StatusForbidden {
-		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusForbidden, testURL, res.StatusCode)
+
+	AddHostToBlockList(p.GetList(), blockedHost)
+
+	// Next, ensure the same host cannot be accessed after being added to the block list
+
+	r := httptest.NewRequest("GET", testURL, strings.NewReader(""))
+
+	w := httptest.NewRecorder()
+
+	http.HandlerFunc(p.blockListAwareHandler).ServeHTTP(w, r)
+
+	if w.Code != http.StatusForbidden {
+		t.Logf("Wanted HTTP StatusCode: %d for URL after adding host to block list: %s but got: %d\n", http.StatusForbidden, testURL, w.Code)
 		t.Fail()
 	}
 }
 
-// TestAllowsWhitelistedHost ensures that a host that has not been explicitly blocked
-// can be reached through procrastiproxy
-func TestAllowsWhitelistedHost(t *testing.T) {
-
-	client, backend, err := setupBlockListAwareServer(t)
-	defer backend.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	blockedHost := "nytimes.com"
-	testURL := "http://wikipedia.org"
-
-	// Set the blocked hosts config variable that is used by the proxy backend
-	AddHostToBlockList(blockedHost)
-
-	res, err := client.Get(testURL)
-	if err != nil {
-		t.Fatalf("Error attempting to fetch test server URL: %v\n", err)
-	}
-	if res.StatusCode != http.StatusOK {
-		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, res.StatusCode)
-		t.Fail()
-	}
-}
-
+// TestProxiedHost ensures that you can use the proxyHandler to do "pass-through" network requests
 func TestProxiedHost(t *testing.T) {
-
-	client, backend, err := setupProxyTestServer(t)
-	defer backend.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
+	t.Parallel()
 
 	testURL := "http://reddit.com"
 
-	res, err := client.Get(testURL)
-	if err != nil {
-		t.Fatalf("Error attempting to fetch proxy test server URL: %v\n", err)
-	}
-	if res.StatusCode != http.StatusOK {
-		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, res.StatusCode)
+	// First, ensure that the target host can be reached before it is added to the block list
+	r := httptest.NewRequest("GET", testURL, strings.NewReader(""))
+
+	w := httptest.NewRecorder()
+
+	http.HandlerFunc(proxyHandler).ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, w.Code)
 		t.Fail()
 	}
 }
 
+// TestAdminHandlerBlocksHostsDynamicallt ensures that you can dynamically add a new host to the block list
+// via the admin/block endpoint, that will be respected for all subsequent requests
 func TestAdminHandlerBlocksHostsDynamically(t *testing.T) {
+	t.Parallel()
 
-	client, backend, err := setupAdminTestServer(t)
-	defer backend.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
+	p := NewProcrastiproxy()
+
+	// Sanity check the initial block list is empty
+	require.Equal(t, p.GetList().Length(), 0)
 
 	testHost := "docker.com"
 
+	// Sanity check that we can initially reach the target host because it has not yet been blocked
+	testHostURL := "http://docker.com"
+	fr := httptest.NewRequest("GET", testHostURL, strings.NewReader(""))
+	rw := httptest.NewRecorder()
+
+	http.HandlerFunc(p.blockListAwareHandler).ServeHTTP(rw, fr)
+
+	if rw.Code != http.StatusOK {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testHostURL, rw.Code)
+		t.Fail()
+	}
+
+	// Now, dynamically block the same target host by making a request to the admin block endpoint, passing the host info
+
 	testURL := fmt.Sprintf("http://localhost:8000/admin/block/%s", testHost)
 
-	res, err := client.Get(testURL)
-	if err != nil {
-		t.Fatalf("Error attempting to fetch admin test server URL: %v\n", err)
-	}
-	if res.StatusCode != http.StatusOK {
-		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, res.StatusCode)
+	r := httptest.NewRequest("GET", testURL, strings.NewReader(""))
+	w := httptest.NewRecorder()
+
+	http.HandlerFunc(p.adminHandler).ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, w.Code)
 		t.Fail()
 	}
 
 	// Finally, ensure the host we just dynamically added to the block list is found
-	l := GetList()
+	require.True(t, p.GetList().Contains(testHost))
+	require.Equal(t, p.GetList().Length(), 1)
 
-	require.True(t, l.Contains(testHost))
+	// Ensure that, attempting to hit the same host now fails because it is blocked at the proxy level
+	ar := httptest.NewRequest("GET", testHostURL, strings.NewReader(""))
+	aw := httptest.NewRecorder()
 
-	l.Clear()
+	http.HandlerFunc(p.blockListAwareHandler).ServeHTTP(aw, ar)
+
+	if aw.Code != http.StatusForbidden {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusForbidden, testHostURL, aw.Code)
+		t.Fail()
+	}
 }
 
+// TestAdminHandlerUnblocksHostsDynamically ensures that a blocked host can be removed from the block list via the admin/unblock endpoint
 func TestAdminHandlerUnblocksHostsDynamically(t *testing.T) {
+	t.Parallel()
 
-	client, backend, err := setupAdminTestServer(t)
-	defer backend.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
+	p := NewProcrastiproxy()
 
-	// Start off by pre-populating the list with the test host
 	testHost := "wikipedia.com"
-	l := GetList()
-	l.Add(testHost)
+	testHostURL := fmt.Sprintf("http://%s", testHost)
 
-	testURL := fmt.Sprintf("http://localhost:8000/admin/unblock/%s", testHost)
+	// Pre-populate the list with the test host
+	p.GetList().Add(testHost)
 
-	res, err := client.Get(testURL)
-	if err != nil {
-		t.Fatalf("Error attempting to fetch admin test server URL: %v\n", err)
-	}
-	if res.StatusCode != http.StatusOK {
-		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, res.StatusCode)
+	require.True(t, p.GetList().Contains(testHost))
+
+	// Sanity check that you cannot get the blocked test host to begin with
+	fr := httptest.NewRequest("GET", testHostURL, strings.NewReader(""))
+	rw := httptest.NewRecorder()
+
+	http.HandlerFunc(p.blockListAwareHandler).ServeHTTP(rw, fr)
+
+	if rw.Code != http.StatusForbidden {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusForbidden, testHostURL, rw.Code)
 		t.Fail()
 	}
 
-	// Finally, ensure the host we just dynamically added to the block list is found
-	require.False(t, l.Contains(testHost))
+	// Now, dynamically unblock the same test host by making a request to the admin unblock endpoint
+	testAdminURL := fmt.Sprintf("http://localhost:8000/admin/unblock/%s", testHost)
 
-	l.Clear()
+	r := httptest.NewRequest("GET", testAdminURL, strings.NewReader(""))
+	w := httptest.NewRecorder()
+
+	http.HandlerFunc(p.adminHandler).ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testAdminURL, w.Code)
+		t.Fail()
+	}
+
+	// Ensure the host we just dynamically removed from the block list is no longer found on it
+	require.False(t, p.GetList().Contains(testHost))
+	require.Equal(t, p.GetList().Length(), 0)
+
+	// Ensure that we can access the test host now that it has been unblocked via the admin endpoint
+	ar := httptest.NewRequest("GET", testHostURL, strings.NewReader(""))
+	aw := httptest.NewRecorder()
+
+	http.HandlerFunc(p.blockListAwareHandler).ServeHTTP(aw, ar)
+
+	if aw.Code != http.StatusOK {
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testHostURL, aw.Code)
+		t.Fail()
+	}
 }

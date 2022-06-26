@@ -13,10 +13,9 @@ func sanitizeHost(host string) string {
 	return strings.ToLower(strings.TrimSpace(strings.Replace(host, "\n", "", -1)))
 }
 
-func hostIsBlocked(host string) bool {
+func hostIsOnBlockList(host string, list *List) bool {
 	host = sanitizeHost(host)
-	blockList := GetList()
-	return blockList.Contains(host)
+	return list.Contains(host)
 }
 
 func RunServer(args []string) {

@@ -45,19 +45,17 @@ func TestParseBlockListInput(t *testing.T) {
 
 	for _, tc := range testCases {
 
-		l := GetList()
-		l.Clear()
+		l := NewList()
 
 		t.Run(tc.Name, func(t *testing.T) {
-			err := parseBlockListInput(&tc.InputString)
+			err := parseBlockListInput(&tc.InputString, l)
 			require.NoError(t, err)
 
 			// Ensure list has expected members following parsing
-			l := GetList()
 			for _, member := range tc.Want {
 				require.True(t, l.Contains(member))
 				//Also sanity check that hostIsBlocked returns true
-				require.True(t, hostIsBlocked(member))
+				require.True(t, hostIsOnBlockList(member, l))
 			}
 
 		})

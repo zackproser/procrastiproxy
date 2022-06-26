@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-var list = newList()
+var list = NewList()
 
 type List struct {
 	m       sync.Mutex
@@ -16,7 +16,7 @@ func GetList() *List {
 	return list
 }
 
-func newList() *List {
+func NewList() *List {
 	return &List{
 		members: make(map[string]bool),
 	}

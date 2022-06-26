@@ -14,7 +14,8 @@ var procrastiproxy *Procrastiproxy
 var DefaultNow = time.Now
 
 type Procrastiproxy struct {
-	Now func() time.Time
+	Now  func() time.Time
+	List *List
 	ProxyTimeSettings
 }
 
@@ -23,9 +24,14 @@ func NewProcrastiproxy() *Procrastiproxy {
 		return procrastiproxy
 	}
 	procrastiproxy = &Procrastiproxy{
-		Now: DefaultNow,
+		Now:  DefaultNow,
+		List: NewList(),
 	}
 	return procrastiproxy
+}
+
+func (p *Procrastiproxy) GetList() *List {
+	return p.List
 }
 
 // custom errors

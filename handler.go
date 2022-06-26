@@ -77,7 +77,7 @@ func (p *Procrastiproxy) timeAwareHandler(w http.ResponseWriter, r *http.Request
 
 func (p *Procrastiproxy) blockListAwareHandler(w http.ResponseWriter, r *http.Request) {
 	host := sanitizeHost(r.URL.Host)
-	if hostIsBlocked(host) {
+	if hostIsOnBlockList(host, p.GetList()) {
 		log.Debugf("Blocking request to host: %s. User explicitly blocked and present time is within configured proxy block window", host)
 		blockRequest(w)
 		return
@@ -94,7 +94,7 @@ func (p *Procrastiproxy) adminHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	var respMsg string
-	list := GetList()
+	list := p.GetList()
 	if adminCmd.Command == "block" {
 		list.Add(adminCmd.Host)
 		respMsg = fmt.Sprintf("Successfully added: %s to the block list\n", adminCmd.Host)

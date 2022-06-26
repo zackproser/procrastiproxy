@@ -10,6 +10,7 @@ workflows:
       - test
       - test-windows
       - test-mac
+      - test-mac-12-go-1-18
       - release:
           # Only run this job on git tag pushes
           filters:
@@ -60,6 +61,26 @@ jobs:
           command: |
             mkdir -p /tmp/logs
             go test -v ./... --timeout 5m | tee /tmp/logs/test.log
+
+  
+  # Specifically test Go 1.18 on mac to catch syscall issues
+  test-mac-12-go-1-18:
+    macos:
+      xcode: 12.5.1
+    steps:
+      - checkout
+      - run: 
+         name: install go 
+         command: |
+           brew install go@1.18
+           # Make Go available in the PATH upon first being installed
+           echo 'export PATH="/usr/local/opt/go@1.18/bin:$PATH"' >> /Users/distiller/.bash_profile
+      - run:
+          name: run tests
+          command: |
+            mkdir -p /tmp/logs
+            go test -v ./... --timeout 5m | tee /tmp/logs/test.log
+
   release:
     docker:
       - image: cimg/go:1.17

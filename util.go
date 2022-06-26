@@ -15,7 +15,7 @@ func validateBlockListInput(blockListMembers []string) error {
 	return nil
 }
 
-func parseBlockListInput(blockList *string) error {
+func parseBlockListInput(blockList *string, list *List) error {
 	var blockListMembers []string
 	var blockListString = *blockList
 	if blockListString != "" {
@@ -28,7 +28,7 @@ func parseBlockListInput(blockList *string) error {
 	}
 
 	for _, host := range blockListMembers {
-		AddHostToBlockList(host)
+		AddHostToBlockList(list, host)
 	}
 
 	return nil
@@ -63,8 +63,7 @@ func parseStartAndEndTimes(blockTimeStart, blockTimeEnd string) error {
 }
 
 // Build the fast, in-memory list of blocked hosts from the configured values
-func AddHostToBlockList(hosts ...string) {
-	list := GetList()
+func AddHostToBlockList(list *List, hosts ...string) {
 	for _, host := range hosts {
 		list.Add(host)
 	}
