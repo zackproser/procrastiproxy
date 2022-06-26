@@ -18,20 +18,17 @@ func hostIsOnBlockList(host string, list *List) bool {
 	return list.Contains(host)
 }
 
-func RunServer(args []string) {
-	port := args[0]
-
-	p := NewProcrastiproxy()
+func RunServer(p *Procrastiproxy) {
 
 	log.WithFields(logrus.Fields{
-		"Port":                    port,
-		"Address":                 fmt.Sprintf("http://127.0.0.1:%s", port),
-		"Number of sites blocked": GetList().Length(),
+		"Port":                    p.GetPort(),
+		"Address":                 fmt.Sprintf("http://127.0.0.1:%s", p.GetPort()),
+		"Number of sites blocked": p.GetList().Length(),
 		"Log Level":               log.GetLevel().String(),
 	}).Info("Procrastiproxy running...")
 
 	http.HandleFunc("/", p.timeAwareHandler)
 	http.HandleFunc("/admin/", p.adminHandler)
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+p.GetPort(), nil))
 }

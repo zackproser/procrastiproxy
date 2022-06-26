@@ -29,14 +29,14 @@ func blockRequest(w http.ResponseWriter) {
 	w.Write([]byte("Forbidden"))
 }
 
-func proxyHandler(w http.ResponseWriter, r *http.Request) {
+func (p *Procrastiproxy) proxyHandler(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(logrus.Fields{
 		"Host": r.URL.Host,
 		"Path": r.URL.Path,
 	}).Debug("Proxy handler received request")
 
 	log.WithFields(logrus.Fields{
-		"blocked sites": GetList().All(),
+		"blocked sites": p.GetList().All(),
 	}).Debug("Blocked site hosts")
 
 	makeProxyRequest(w, r)
@@ -72,7 +72,7 @@ func (p *Procrastiproxy) timeAwareHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	log.Debug("Request made outside of configured block time window. Passing through...")
-	proxyHandler(w, r)
+	p.proxyHandler(w, r)
 }
 
 func (p *Procrastiproxy) blockListAwareHandler(w http.ResponseWriter, r *http.Request) {
@@ -89,12 +89,15 @@ func (p *Procrastiproxy) adminHandler(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(logrus.Fields{
 		"Path": r.URL.Path,
 	}).Debug("Admin handler received request")
+
 	adminCmd, err := parseCommandFromPath(r.URL.Path)
 	if err != nil {
 		log.Println(err)
 	}
+
 	var respMsg string
 	list := p.GetList()
+
 	if adminCmd.Command == "block" {
 		list.Add(adminCmd.Host)
 		respMsg = fmt.Sprintf("Successfully added: %s to the block list\n", adminCmd.Host)

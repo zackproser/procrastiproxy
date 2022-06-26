@@ -4,16 +4,9 @@ import (
 	"sync"
 )
 
-var list = NewList()
-
 type List struct {
 	m       sync.Mutex
 	members map[string]bool
-}
-
-// GetList returns the list singleton
-func GetList() *List {
-	return list
 }
 
 func NewList() *List {

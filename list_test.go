@@ -7,7 +7,9 @@ import (
 )
 
 func TestGetList(t *testing.T) {
-	maybeList := GetList()
+	p := NewProcrastiproxy()
+
+	maybeList := p.GetList()
 	require.NotNil(t, maybeList)
 }
 
@@ -34,13 +36,11 @@ func TestListAddResultsInExpectedElements(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		p := NewProcrastiproxy()
 		// Reset the list singleton before each test case is run
-		l := GetList()
-		l.Clear()
-		t.Run(tc.Name, func(t *testing.T) {
+		l := p.GetList()
 
-			// Instantiate a new list, then add every test element to it sequentially
-			l := GetList()
+		t.Run(tc.Name, func(t *testing.T) {
 			for _, item := range tc.ElementsToAdd {
 				l.Add(item)
 			}
@@ -73,13 +73,11 @@ func TestListRemoveResultsInExpectedElements(t *testing.T) {
 
 	for _, tc := range testCases {
 
-		l := GetList()
-		l.Clear()
+		p := NewProcrastiproxy()
+		l := p.GetList()
 
 		t.Run(tc.Name, func(t *testing.T) {
 
-			// Instantiate a new list, then add every test element to it sequentially
-			l := GetList()
 			for _, item := range tc.ElementsToAdd {
 				l.Add(item)
 			}

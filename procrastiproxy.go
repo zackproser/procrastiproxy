@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-var procrastiproxy *Procrastiproxy
-
 // DefaultNow is the default implementation of Procrastiproxy's Now function,
 // as we want procrastiproxy to return the actual time during normal operations. In
 // testing, we override this method with static values (e.g., 9:00PM or 3:23 AM) in test
@@ -15,23 +13,28 @@ var DefaultNow = time.Now
 
 type Procrastiproxy struct {
 	Now  func() time.Time
+	Port string
 	List *List
 	ProxyTimeSettings
 }
 
 func NewProcrastiproxy() *Procrastiproxy {
-	if procrastiproxy != nil {
-		return procrastiproxy
-	}
-	procrastiproxy = &Procrastiproxy{
+	return &Procrastiproxy{
 		Now:  DefaultNow,
 		List: NewList(),
 	}
-	return procrastiproxy
 }
 
 func (p *Procrastiproxy) GetList() *List {
 	return p.List
+}
+
+func (p *Procrastiproxy) SetPort(s string) {
+	p.Port = s
+}
+
+func (p *Procrastiproxy) GetPort() string {
+	return p.Port
 }
 
 // custom errors

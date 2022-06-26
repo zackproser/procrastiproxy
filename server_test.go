@@ -51,6 +51,8 @@ func TestHostBlocking(t *testing.T) {
 func TestProxiedHost(t *testing.T) {
 	t.Parallel()
 
+	p := NewProcrastiproxy()
+
 	testURL := "http://reddit.com"
 
 	// First, ensure that the target host can be reached before it is added to the block list
@@ -58,7 +60,7 @@ func TestProxiedHost(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	http.HandlerFunc(proxyHandler).ServeHTTP(w, r)
+	http.HandlerFunc(p.proxyHandler).ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, w.Code)
@@ -72,6 +74,8 @@ func TestAdminHandlerBlocksHostsDynamically(t *testing.T) {
 	t.Parallel()
 
 	p := NewProcrastiproxy()
+
+	t.Logf("p.GetList().All(): %+v\n", p.GetList().All())
 
 	// Sanity check the initial block list is empty
 	require.Equal(t, p.GetList().Length(), 0)

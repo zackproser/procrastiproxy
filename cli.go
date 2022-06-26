@@ -62,7 +62,10 @@ func RunCLI() error {
 	if *blockList == "" {
 		log.Debug("Proxy will allow all traffic, because you did not supply any sites to block via the --block flag")
 	}
-	args := []string{*port, *blockList}
-	RunServer(args)
+
+	p.SetPort(*port)
+
+	RunServer(p)
+
 	return nil
 }
