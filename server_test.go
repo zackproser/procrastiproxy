@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -17,32 +18,40 @@ func TestHostBlocking(t *testing.T) {
 
 	p := NewProcrastiproxy()
 
-	blockedHost := "reddit.com"
-	testURL := "http://reddit.com"
+	// Create a test server to mimic reddit.com
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "OK")
+
+	}))
+	defer ts.Close()
 
 	// First, ensure that the target host can be reached before it is added to the block list
-	fr := httptest.NewRequest("GET", testURL, strings.NewReader(""))
+	fr := httptest.NewRequest("GET", ts.URL, strings.NewReader(""))
 
 	fw := httptest.NewRecorder()
 
 	http.HandlerFunc(p.blockListAwareHandler).ServeHTTP(fw, fr)
 
 	if fw.Code != http.StatusOK {
-		t.Logf("Wanted HTTP StatusCode: %d for URL prior to adding host to block list: %s but got: %d\n", http.StatusOK, testURL, fw.Code)
+		t.Logf("Wanted HTTP StatusCode: %d for URL prior to adding host to block list: %s but got: %d\n", http.StatusOK, ts.URL, fw.Code)
 	}
 
-	AddHostToBlockList(p.GetList(), blockedHost)
+	u, parseErr := url.Parse(ts.URL)
+	require.NoError(t, parseErr)
+
+	AddHostToBlockList(p.GetList(), u.Host)
 
 	// Next, ensure the same host cannot be accessed after being added to the block list
 
-	r := httptest.NewRequest("GET", testURL, strings.NewReader(""))
+	r := httptest.NewRequest("GET", ts.URL, strings.NewReader(""))
 
 	w := httptest.NewRecorder()
 
 	http.HandlerFunc(p.blockListAwareHandler).ServeHTTP(w, r)
 
 	if w.Code != http.StatusForbidden {
-		t.Logf("Wanted HTTP StatusCode: %d for URL after adding host to block list: %s but got: %d\n", http.StatusForbidden, testURL, w.Code)
+		t.Logf("Wanted HTTP StatusCode: %d for URL after adding host to block list: %s but got: %d\n", http.StatusForbidden, ts.URL, w.Code)
 		t.Fail()
 	}
 }
@@ -53,17 +62,23 @@ func TestProxiedHost(t *testing.T) {
 
 	p := NewProcrastiproxy()
 
-	testURL := "http://reddit.com"
+	// Create a test server to mimic reddit.com
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "OK")
+
+	}))
+	defer ts.Close()
 
 	// First, ensure that the target host can be reached before it is added to the block list
-	r := httptest.NewRequest("GET", testURL, strings.NewReader(""))
+	r := httptest.NewRequest("GET", ts.URL, strings.NewReader(""))
 
 	w := httptest.NewRecorder()
 
 	http.HandlerFunc(p.proxyHandler).ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
-		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, testURL, w.Code)
+		t.Logf("Wanted HTTP StatusCode: %d for URL: %s but got: %d\n", http.StatusOK, ts.URL, w.Code)
 		t.Fail()
 	}
 }
