@@ -99,6 +99,8 @@ func TestListAddResultsInExpectedElements(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc
+
 		p := NewProcrastiproxy()
 		// Reset the list singleton before each test case is run
 		l := p.GetList()
@@ -114,6 +116,44 @@ func TestListAddResultsInExpectedElements(t *testing.T) {
 		})
 	}
 
+}
+
+func TestListClear(t *testing.T) {
+	type TestCase struct {
+		Name          string
+		ElementsToAdd []string
+	}
+
+	testCases := []TestCase{
+		{
+			Name:          "List clear removes three elements",
+			ElementsToAdd: []string{"one", "two", "three"},
+		},
+		{
+			Name:          "List clear removes ten elements",
+			ElementsToAdd: []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+
+		p := NewProcrastiproxy()
+		l := p.GetList()
+
+		t.Run(tc.Name, func(t *testing.T) {
+			for _, item := range tc.ElementsToAdd {
+				l.Add(item)
+			}
+
+			require.Equal(t, len(tc.ElementsToAdd), l.Length())
+
+			// Clear the list and ensure it contains no elements
+			l.Clear()
+
+			require.Equal(t, 0, l.Length())
+		})
+	}
 }
 
 func TestListRemoveResultsInExpectedElements(t *testing.T) {
