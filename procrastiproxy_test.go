@@ -146,12 +146,16 @@ func TestListClear(t *testing.T) {
 				l.Add(item)
 			}
 
-			require.Equal(t, len(tc.ElementsToAdd), l.Length())
+			if len(tc.ElementsToAdd) != l.Length() {
+				t.Errorf("Expected len(tc.ElementsToAdd): %d to equal length of list: %d", len(tc.ElementsToAdd), l.Length())
+			}
 
 			// Clear the list and ensure it contains no elements
 			l.Clear()
 
-			require.Equal(t, 0, l.Length())
+			if l.Length() != 0 {
+				t.Errorf("Expected test list to have zero members after calling l.Clear() but got length of %d", l.Length())
+			}
 		})
 	}
 }
