@@ -271,14 +271,117 @@ func TestProxiedHost(t *testing.T) {
 	}
 }
 
+func TestTimeAwareHandler(t *testing.T) {
+	type TestCase struct {
+		Name           string
+		StartBlockTime string
+		EndBlockTime   string
+		Now            func() time.Time
+		Want           int
+	}
+
+	testCases := []TestCase{
+		{
+			Name:           "Request is forbidden when made 1 minute after block window begins",
+			StartBlockTime: "9:00AM",
+			EndBlockTime:   "5:00PM",
+			Now: func() time.Time {
+				n := time.Now()
+				// Create a "fake" date time to use for the Procrastiproxy's Now method that is set to be 9:01AM
+				test := time.Date(n.Year(), n.Month(), n.Day(), 9, 1, 0, 0, time.UTC)
+				return test
+			},
+			Want: http.StatusForbidden,
+		},
+		{
+			Name:           "Request is forbidden when made 3 hours after block window begins",
+			StartBlockTime: "9:00AM",
+			EndBlockTime:   "5:00PM",
+			Now: func() time.Time {
+				n := time.Now()
+				// Create a "fake" date time to use for the Procrastiproxy's Now method that is set to be 12 noon
+				test := time.Date(n.Year(), n.Month(), n.Day(), 12, 0, 0, 0, time.UTC)
+				return test
+			},
+			Want: http.StatusForbidden,
+		},
+		{
+			Name:           "Request is allowed when made 22 hours before block window begins",
+			StartBlockTime: "9:00AM",
+			EndBlockTime:   "5:00PM",
+			Now: func() time.Time {
+				n := time.Now()
+				// Create a "fake" date time to use for the Procrastiproxy's Now method that is set to be 6:00AM
+				test := time.Date(n.Year(), n.Month(), n.Day(), 6, 0, 0, 0, time.UTC)
+				return test
+			},
+			Want: http.StatusOK,
+		},
+		{
+			Name:           "Request is allowed when made 3 minutes before block window begins",
+			StartBlockTime: "9:00AM",
+			EndBlockTime:   "5:00PM",
+			Now: func() time.Time {
+				n := time.Now()
+				// Create a "fake" date time to use for the Procrastiproxy's Now method that is set to be 8:57AM
+				test := time.Date(n.Year(), n.Month(), n.Day(), 8, 57, 0, 0, time.UTC)
+				return test
+			},
+			Want: http.StatusOK,
+		},
+		{
+			Name:           "Request is allowed when made 1 minute after block window ends",
+			StartBlockTime: "9:00AM",
+			EndBlockTime:   "5:00PM",
+			Now: func() time.Time {
+				n := time.Now()
+				// Create a "fake" date time to use for the Procrastiproxy's Now method that is set to be 5:01PM
+				test := time.Date(n.Year(), n.Month(), n.Day(), 17, 1, 0, 0, time.UTC)
+				return test
+			},
+			Want: http.StatusOK,
+		},
+	}
+
+	for _, tc := range testCases {
+
+		tc := tc
+
+		t.Run(tc.Name, func(t *testing.T) {
+
+			p := NewProcrastiproxy()
+
+			p.Now = tc.Now
+
+			testHost := "example.com"
+			testHostURL := fmt.Sprintf("http://%s", testHost)
+
+			AddHostToBlockList(p.GetList(), testHost)
+
+			parseErr := parseStartAndEndTimes(tc.StartBlockTime, tc.EndBlockTime)
+			require.NoError(t, parseErr)
+
+			p.ConfigureProxyTimeSettings(tc.StartBlockTime, tc.EndBlockTime)
+
+			fr := httptest.NewRequest("GET", testHostURL, strings.NewReader(""))
+			rw := httptest.NewRecorder()
+
+			http.HandlerFunc(p.timeAwareHandler).ServeHTTP(rw, fr)
+
+			if rw.Code != tc.Want {
+				t.Logf("Wanted status code: %d for test: %s but got: %d", tc.Want, tc.Name, rw.Code)
+				t.Fail()
+			}
+		})
+	}
+}
+
 // TestAdminHandlerBlocksHostsDynamicallt ensures that you can dynamically add a new host to the block list
 // via the admin/block endpoint, that will be respected for all subsequent requests
 func TestAdminHandlerBlocksHostsDynamically(t *testing.T) {
 	t.Parallel()
 
 	p := NewProcrastiproxy()
-
-	t.Logf("p.GetList().All(): %+v\n", p.GetList().All())
 
 	// Sanity check the initial block list is empty
 	require.Equal(t, p.GetList().Length(), 0)

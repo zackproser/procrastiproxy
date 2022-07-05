@@ -192,7 +192,7 @@ func parseCommandFromPath(path string) (*AdminCommand, error) {
 }
 
 func (p *Procrastiproxy) timeAwareHandler(w http.ResponseWriter, r *http.Request) {
-	if p.WithinBlockWindow(time.Now()) {
+	if p.WithinBlockWindow(p.Now()) {
 		log.Debug("Request made within block time window. Examining if host permitted..")
 		p.blockListAwareHandler(w, r)
 		return
